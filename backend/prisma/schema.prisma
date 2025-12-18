@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  name         String
+  sign         String
+  timePreference Int    @default(20) // minutes available
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pet          Pet?
+  quests       Quest[]
+  tasks        Task[]
+  goals        Goal[]
+  journalEntries JournalEntry[]
+  compatibilityProfiles CompatibilityProfile[]
+}
+
+model Pet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  xp        Int      @default(0)
+  stage     String   @default("Egg") // Egg, Hatchling, Junior, Adult, Evolved
+  lastFed   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Quest {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  type             String   // Main, Side, Recovery
+  xp               Int
+  estimatedMinutes Int
+  tinyVersion      String?
+  isCompleted      Boolean  @default(false)
+  completedAt      DateTime?
+  date             String   // YYYY-MM-DD
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  isCompleted Boolean  @default(false)
+  isTop3      Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Goal {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  why             String
+  northStar       String   // 30-60 day goal
+  weeklyMilestone String
+  dailyMicroStep  String
+  fallbackStep    String
+  progress        Int      @default(0) // 0-100
+  isPaused        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model JournalEntry {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        String   // YYYY-MM-DD
+  tarotCard   String
+  tarotMeaning String
+  prompts     String   // JSON string of prompts array
+  mood        Int      // 1-5
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model CompatibilityProfile {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  sign       String
+  vibeScore  Int      // 0-100
+  strengths  String   // JSON array
+  friction   String
+  advice     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model DailyHoroscope {
+  id           String   @id @default(uuid())
+  sign         String
+  date         String   // YYYY-MM-DD
+  overall      String
+  love         String
+  career       String
+  wellness     String
+  luckyNumber  Int
+  luckyColor   String
+  mood         String
+  compatibility String
+  createdAt    DateTime @default(now())
+
+  @@unique([sign, date])
+}
+
+model DailyGuidance {
+  id           String   @id @default(uuid())
+  sign         String
+  date         String   // YYYY-MM-DD
+  starGuidance String
+  theme        String
+  mode         String   // Focus, Social, Reset
+  doList       String   // JSON array
+  avoidList    String   // JSON array
+  timingHint   String   // Morning, Afternoon, Evening
+  createdAt    DateTime @default(now())
+
+  @@unique([sign, date])
+}
