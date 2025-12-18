@@ -48,6 +48,7 @@ interface AppState {
     refreshDailyQuests: (force?: boolean) => void;
     checkAndRefreshQuests: () => void;
     feedPet: () => void;
+    setPet: (pet: Partial<PetState>) => void;
     reset: () => void;
 }
 
@@ -167,6 +168,12 @@ export const useStore = create<AppState>()(
                 // Logic for feeding
                 set((state) => ({
                     pet: { ...state.pet, xp: state.pet.xp + 5 }
+                }));
+            },
+
+            setPet: (petUpdate) => {
+                set((state) => ({
+                    pet: { ...state.pet, ...petUpdate }
                 }));
             },
 
